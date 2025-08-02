@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; margin: 30px; }
+input, button { margin: 4px;}
+.ticket { border: 1px solid #ddd; margin: 8px 0; padding: 8px; }
+.section { margin-bottom: 20px;}
+h1 { color: #336699; }
+button { background: #336699; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;}
+button:hover { background: #25496e; }
+input { padding: 3px 6px; border-radius: 3px; border: 1px solid #bbb;}
+#loginMsg, #regMsg, #createMsg { margin-top: 5px; color: #b22222; }

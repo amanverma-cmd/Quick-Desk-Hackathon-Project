@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>QuickDesk</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Include Axios from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>QuickDesk</h1>
+    <div id="authSection" class="section">
+        <h2>Register</h2>
+        <input id="regName" placeholder="Name">
+        <input id="regEmail" placeholder="Email">
+        <input id="regPwd" placeholder="Password" type="password">
+        <button onclick="register()">Register</button>
+        <div id="regMsg"></div>
+        <br><br>
+        <h2>Login</h2>
+        <input id="loginEmail" placeholder="Email">
+        <input id="loginPwd" placeholder="Password" type="password">
+        <button onclick="login()">Login</button>
+        <div id="loginMsg"></div>
+    </div>
+    <div id="userPanel" class="section" style="display:none;">
+        <button onclick="showCreate(true)">Create Ticket</button>
+        <button onclick="loadTickets()">My Tickets</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+    <div id="createForm" class="section" style="display:none;">
+        <h2>Create Ticket</h2>
+        <input id="subject" placeholder="Subject">
+        <input id="description" placeholder="Description">
+        <input id="category" placeholder="Category">
+        <button onclick="createTicket()">Submit</button>
+        <button onclick="showCreate(false)">Cancel</button>
+        <div id="createMsg"></div>
+    </div>
+    <div id="tickets"></div>
+    <script src="script.js"></script>
+</body>
+</html>
