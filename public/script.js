@@ -1,5 +1,4 @@
 let token = "";
-// Change to your backend API if needed
 const API = "http://localhost:3000";
 
 function showCreate(show) {
@@ -36,6 +35,7 @@ window.login = function() {
         if(res.data.token) {
             token = res.data.token;
             setLoggedIn(true);
+            loadCategories();
             document.getElementById('loginMsg').innerText = "Login success!";
         } else {
             document.getElementById('loginMsg').innerText = res.data.message || "Login failed";
@@ -46,22 +46,32 @@ window.login = function() {
     });
 }
 
-window.loadTickets = function() {
+    window.loadTickets = function() {
     if(!token) return;
+    document.getElementById('tickets').innerHTML = "Loading...";
     axios.get(API + "/ticket/my", {
         headers: { "Authorization": token }
     })
     .then(res => {
         let tix = res.data.tickets || [];
         let html = "<h2>My Tickets</h2>";
-        html += tix.length ? tix.map(tt=>`
-        <div class="ticket">
-            <b>${tt.subject}</b><br>
-            ${tt.description}<br>
-            Status: ${tt.status}<br>
-            Category: ${tt.category}
-        </div>
-        `).join("") : "No tickets yet.";
+        html += tix.length ? tix.map(tt => `
+  <div class="ticket">
+    <b>${tt.subject}</b><br>
+    ${tt.description}<br>
+    Category: ${tt.category}<br>
+    Status: ${tt.status}<br>
+    Upvotes: <span id="up${tt._id}">${tt.upvotes}</span>
+    <button onclick="upvote('${tt._id}')">⬆️</button>
+    Downvotes: <span id="down${tt._id}">${tt.downvotes}</span>
+    <button onclick="downvote('${tt._id}')">⬇️</button>
+    <button onclick="changeStatus('${tt._id}')">Close Ticket</button>
+    <button onclick="showComments('${tt._id}')">Comments</button>
+    <button onclick="assignTicketPrompt('${tt._id}')">Assign</button>
+<div id="comments-${tt._id}" style="margin-left:20px;"></div>
+  </div>
+`).join("") : "No tickets yet.";
+
         document.getElementById('tickets').innerHTML = html;
     });
 }
@@ -77,6 +87,10 @@ window.createTicket = function() {
     })
     .then(res => {
         document.getElementById('createMsg').innerText = res.data.ticket ? "Ticket created" : (res.data.message || "Error");
+        if (res.data.ticket) {
+            document.getElementById('subject').value = "";
+            document.getElementById('description').value = "";
+        }
         showCreate(false);
         loadTickets();
     })
@@ -85,7 +99,91 @@ window.createTicket = function() {
     });
 }
 
+
 window.logout = function() {
     setLoggedIn(false);
     document.getElementById('tickets').innerHTML = "";
+}
+
+
+window.upvote = function(id) {
+  axios.post(`${API}/ticket/${id}/upvote`, {}, { headers: { Authorization: token } })
+    .then(res => {
+      document.getElementById('up' + id).textContent = res.data.ticket.upvotes;
+    });
+}
+window.downvote = function(id) {
+  axios.post(`${API}/ticket/${id}/downvote`, {}, { headers: { Authorization: token } })
+    .then(res => {
+      document.getElementById('down' + id).textContent = res.data.ticket.downvotes;
+    });
+}
+
+window.showComments = function(ticketId) {
+  const area = document.getElementById('comments-' + ticketId);
+  axios.get(`${API}/comment/${ticketId}`, { headers: { Authorization: token } })
+    .then(res => {
+      let comments = (res.data.comments || []).map(cm => 
+        `<div>🗨️ ${cm.text}</div>`).join("");
+      comments += `
+        <input id="comm-inp-${ticketId}" placeholder="Add comment" style="width:120px;">
+        <button onclick="addComment('${ticketId}')">Send</button>
+        <div id="comm-msg-${ticketId}" style="color: #b22222;"></div>
+      `;
+      area.innerHTML = comments;
+    });
+};
+
+window.addComment = function(ticketId) {
+  const inp = document.getElementById('comm-inp-' + ticketId);
+  axios.post(`${API}/comment/${ticketId}`, 
+    { text: inp.value }, 
+    { headers: { Authorization: token } })
+    .then(() => {
+      showComments(ticketId);
+    });
+};
+
+window.changeStatus = function(ticketId) {
+  const newStatus = prompt("Enter new status (e.g., Open, Closed, In Progress):", "Closed");
+  if (!newStatus) return;
+  axios.patch(`${API}/ticket/${ticketId}/status`, 
+    { status: newStatus },
+    { headers: { Authorization: token } })
+    .then(() => loadTickets());
+}
+
+
+
+function loadCategories() {
+  axios.get(`${API}/category/all`, { headers: { Authorization: token } })
+    .then(res => {
+      let options = res.data.categories.map(cat =>
+        `<option value="${cat.name}">${cat.name}</option>`
+      ).join('');
+      document.getElementById('category').innerHTML = options;
+    });
+}
+
+window.assignTicketPrompt = function(ticketId) {
+  const agentId = prompt("Enter agent user ID to assign this ticket:");
+  if (!agentId) return;
+  axios.patch(`${API}/ticket/${ticketId}/assign`, 
+    { agentId: agentId },
+    { headers: { Authorization: token } })
+    .then(res => {
+      alert("Assigned!");
+      loadTickets();
+    });
+}
+
+window.changeUserRole = function() {
+  const uid = document.getElementById('userRoleId').value;
+  const role = document.getElementById('userRoleValue').value;
+  axios.patch(`${API}/ticket/user/${uid}/role`, 
+    { role: role }, 
+    { headers: { Authorization: token } })
+    .then(res => {
+      document.getElementById('roleMsg').innerText = "Role changed!";
+    });
 }

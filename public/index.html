@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>QuickDesk</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Include Axios from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
@@ -32,12 +31,18 @@
         <h2>Create Ticket</h2>
         <input id="subject" placeholder="Subject">
         <input id="description" placeholder="Description">
-        <input id="category" placeholder="Category">
+        <select id="category"></select>
         <button onclick="createTicket()">Submit</button>
         <button onclick="showCreate(false)">Cancel</button>
         <div id="createMsg"></div>
     </div>
     <div id="tickets"></div>
+    <div id="adminTools">
+  <input id="userRoleId" placeholder="User ID">
+  <input id="userRoleValue" placeholder="Role (user/agent/admin)">
+  <button onclick="changeUserRole()">Change Role</button>
+  <div id="roleMsg"></div>
+</div>
     <script src="script.js"></script>
 </body>
 </html>
